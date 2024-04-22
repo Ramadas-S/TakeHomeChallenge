@@ -13,8 +13,10 @@ urlpatterns = [
     path('edit_task/<str:desc_id>/',views.edit_task,name='edit_task'),
     path('project_detail/<str:prj_id>/',views.project_detail,name='project_detail'),
     path('edit_project/<str:prj_id>/',views.edit_project,name='edit_project'),
-    
+    path('summary_markdown/<str:prj_id>/', views.summary_markdown, name='summary_markdown'),
 ]
+    
+
     
 
 

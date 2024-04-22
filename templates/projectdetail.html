@@ -10,27 +10,68 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
     <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
         .form-control {
-            padding: 1rem .75rem;
+            padding: 10px 15px;
             border-radius: 0;
             border: 1px solid #ced4da;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
         }
         .form-control:focus {
             border-color: #80bdff;
+            outline: 0;
             box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
         }
         .input-group .btn {
             border-radius: 0;
         }
         .card-body {
-            padding: .8rem;
+            padding: 15px;
         }
         .task-list {
-            height: 300px;
-            overflow: auto;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .btn-action {
+            border-radius: 0;
+        }
+        .export-section {
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .export-section h4 {
+            margin-bottom: 15px;
+        }
+        .save, .export {
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .save .btn, .export .btn {
+            width: 70%;
+        }
+        .save .btn i, .export .btn i {
+            margin-right: 5px;
+        }
+        .save .btn-primary, .export .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .save .btn-primary:hover, .export .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
         }
     </style>
 </head>
@@ -42,65 +83,56 @@
     {% endif %}
     
     <div class="container">
-        <h3 class="pt-5 text-center">Project Name : {{ project.title }}</h3>
+        <h3 class="pt-5 text-center">Project Name: {{ project.title }}</h3>
         
-        <br>
-
-
         <div class="row justify-content-between align-items-start">
             <div class="col-md-7 col-lg-7">
                 <h4></h4>
-               
-                    <form action="{% url "edit_project" project.pk %}" method="POST">
-                        {% csrf_token %}
-                        <div class="input-group mb-3">
-                            <input type="text" name="title" class="form-control" value="{{ project.title }}" placeholder="Enter a Project name">
-                            <button class="btn btn-primary" type="submit">Edit</button>
-                        </div>
-                    </form>
-               
+                <form action="{% url "edit_project" project.pk %}" method="POST">
+                    {% csrf_token %}
+                    <div class="input-group mb-3">
+                        <input type="text" name="title" class="form-control" value="{{ project.title }}" placeholder="Enter a Project name">
+                        <button class="btn btn-primary" type="submit">Edit</button>
+                    </div>
+                </form>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-5 col-lg-5">
                 <p class="text-muted text-end">{% now "jS F Y" %}</p>
+
             </div>
         </div>
 
         <div class="row mt-4">
-            <div class="col-md-7 col-lg-7" style="height:250px; overflow: scroll;">
+            <div class="col-md-7 col-lg-7 task-list">
                 <!-- List of all the tasks for the day -->
                 <h5>Tasks</h5>
                 {% for description in description %}
-                <div class="card m-1">
+                <div class="card mb-2">
                     <div class="card-body">
-                        {{ description.description }} <p>Created Date:{{description.created_date}}</p>
-                        <span style="position: relative; float: right;">
-                            <a href="{% url 'mark_as_done' description.pk %}" class="btn btn-success"><i class="fa fa-check"></i> Mark as Done</a>
-                            <a href="{% url 'delete_task' description.pk %}" class="btn btn-danger"><i class="fa fa-trash"></i></a>
-                            <a href="{% url 'edit_task' description.pk %}" class="btn btn-primary"><i class="fa fa-pencil"></i></a>
-                        </span>
+                        {{ description.description }}
+                        <p>Created Date: {{description.created_date}}</p>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'mark_as_done' description.pk %}" class="btn btn-success btn-action"><i class="fas fa-check"></i> Mark as Done</a>
+                            <a href="{% url 'delete_task' description.pk %}" class="btn btn-danger btn-action"><i class="fas fa-trash"></i></a>
+                            <a href="{% url 'edit_task' description.pk %}" class="btn btn-primary btn-action"><i class="fas fa-pencil-alt"></i></a>
+                        </div>
                     </div>
                 </div>
                 {% endfor %}
-               
             </div>
-
 
             <div class="col-md-5 col-lg-5">
                 <h5>Completed Tasks</h5>
                 <!-- List of all the tasks that have completed -->
                 {% for completed_task in completed_task  %}
-                <div class="card m-1">
+                <div class="card mb-2">
                     <div class="card-body">
-                        {{completed_task}}
-                        
-                        <a href="{% url "mark_as_undone" completed_task.pk %}" class="btn btn-danger"><i class="fa fa-check"></i> Mark as Undone</a>
+                        {{ completed_task }}
+                        <a href="{% url "mark_as_undone" completed_task.pk %}" class="btn btn-danger btn-action"><i class="fas fa-check"></i> Mark as Undone</a>
                     </div>
                 </div>
                 {% endfor %}
             </div>
-
-
-
         </div>
 
         <div class="row mt-4">
@@ -115,6 +147,24 @@
                 </form>
             </div>
         </div>
+
+        <div class="export-section">
+            <div class="save">
+                <h4>Save Summary as Markdown</h4>
+                <form action="{% url 'summary_markdown' project.pk %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
+                </form>
+            </div>
+            <div class="export">
+                <h4>Export as secret gist</h4>
+                <form action="{% url 'summary_markdown' project.pk %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-upload"></i> Export</button>
+                </form>
+            </div>
+        </div>
+        
     </div>
 </body>
 </html>

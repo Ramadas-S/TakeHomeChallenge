@@ -24,4 +24,5 @@ urlpatterns = [
     path('',views.landing_page,name='landing_page'),
     
     path('',include('todoapp.urls')),
+    path('',include('account.urls')),
 ]
