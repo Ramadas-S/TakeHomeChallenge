@@ -3,7 +3,8 @@ from django.shortcuts import get_object_or_404, render,redirect
 from .models import Project, Todo
 from django.contrib import messages
 from django.http import HttpResponse
-
+import github3
+from requests.exceptions import Timeout
 
 # Create your views here.
 
@@ -118,20 +119,17 @@ def edit_project(request,prj_id):
             'project':project,
         }
         return render(request,'projectdetail.html',context)
+    
 
-
-def summary_markdown(request,prj_id):
-    # Retrieve project and todos
+def summary_markdown(request, prj_id):
+    
     project = get_object_or_404(Project, pk=prj_id)
     todos = project.todos.all()
-
-    # Count completed todos
+    
     completed_todos = todos.filter(completion_status=True)
     total_todos = todos.count()
     completed_count = completed_todos.count()
     
-    
-   
     # Generate markdown content
     markdown_content = f"# {project.title}\n\n"
     markdown_content += f"**Summary:** {completed_count} / {total_todos} todos completed.\n\n"
@@ -149,13 +147,28 @@ def summary_markdown(request,prj_id):
     for todo in completed_todos:
         markdown_content += "- [x] " + todo.description + "\n"
 
-    folder_path = 'C:/Users/RAMDAS/Desktop/file'
+    
+    folder_path = 'C:/Users/USER/Desktop/file'  #
     file_name = f"{project.title}.md"
     file_path = os.path.join(folder_path, file_name)
     try:
         with open(file_path, 'w') as markdown_file:
             markdown_file.write(markdown_content)
-            return HttpResponse('Summary saved successfully as Markdown.')
+            
+      
+        gh = github3.login(token='YOUR_GITHUB_ACCESS_TOKEN')
+        
+        try:
+            gist = gh.create_gist(
+                public=False,
+                description="Summary of Project Todos",
+                files={file_name: {'content': markdown_content}}
+            )
+            
+            return HttpResponse(f'Summary saved successfully as Markdown. Gist URL: {gist.html_url}')
+        except Timeout:
+           
+            return HttpResponse('Connection to GitHub timed out. Please try again later.', status=500)
     except Exception as e:
+       
         return HttpResponse(f'Error occurred while saving summary: {str(e)}', status=500)
-    
